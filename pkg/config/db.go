@@ -2,6 +2,7 @@ package config
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -12,12 +13,9 @@ func Init() {
 
 	var err error
 
-	DB, err = sql.Open("mysql", "root:Lucian2001@@tcp(database.dev:3306)/BookDB")
-	checkErr(err)
-}
-
-func checkErr(err error) {
+	DB, err = sql.Open("mysql", "root:Lucian2001@@tcp(127.0.0.1:3306)/author_book_db")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("connect success")
 }

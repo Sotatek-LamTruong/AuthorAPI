@@ -9,7 +9,7 @@ import (
 )
 
 type AuthorRepository interface {
-	List() ([]*models.Author, *errors.AppError)
+	List() ([]models.Author, *errors.AppError)
 	Create(author *models.Author) *errors.AppError
 	Get(id int) (*models.Author, *errors.AppError)
 }
@@ -24,19 +24,21 @@ func NewAuthorRepo(db *sql.DB) DefaulAuthorRepository {
 	}
 }
 
-func (r DefaulAuthorRepository) List() ([]*models.Author, *errors.AppError) {
-	var authors []*models.Author
-	result, err := r.db.Query("SELECT * FROM author_book_db.author")
+func (r DefaulAuthorRepository) List() ([]models.Author, *errors.AppError) {
+	var authors []models.Author
+	result, err := r.db.Query("SELECT idAuthor,Name FROM author_book_db.author;")
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
+	defer result.Close()
 	for result.Next() {
-		var author *models.Author
-		err = result.Scan(&author.IdAuthor, &author.Name)
+		var author models.Author
+		err := result.Scan(&author.IdAuthor, &author.Name)
 		if err != nil {
 			panic(err.Error())
 		}
 		authors = append(authors, author)
+		fmt.Println(authors)
 	}
 	return authors, nil
 }

@@ -5,6 +5,7 @@ import (
 	"book-author/pkg/errors"
 	"book-author/pkg/models"
 	"book-author/pkg/repository"
+	"fmt"
 )
 
 type AuthorServices interface {
@@ -29,7 +30,9 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, *errors.AppError) {
 	if err != nil {
 		return nil, err
 	}
-
+	for _, author := range authors {
+		fmt.Println(author)
+	}
 	return &dto.ListAuthor{
 		Authors: authors,
 	}, nil

@@ -5,7 +5,7 @@ import (
 )
 
 type ListAuthor struct {
-	Authors []*models.Author `json:"authors"`
+	Authors []models.Author `json:"authors"`
 }
 
 //

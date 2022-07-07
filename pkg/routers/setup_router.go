@@ -8,5 +8,8 @@ func SetupRoute(app *gin.Engine) {
 			"message": "done",
 		})
 	})
-	v1 := app.Group("api/v1")
+	v1 := app.Group("/")
+
+	AuthorRoutes(v1)
+
 }

@@ -5,15 +5,15 @@ import (
 	"book-author/pkg/handlers"
 	"book-author/pkg/repository"
 	"book-author/pkg/services"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AuthorRoutes(route *gin.RouterGroup) {
-
 	h := handlers.NewAuthorHandlers(services.NewAuthor(repository.NewAuthorRepo(config.DB)))
-	route.GET("/", h.GetAllAuthors())
-
+	route.GET("/list", h.GetAllAuthors())
+	fmt.Println("hi")
 	route.GET("/author/{id}", h.GetAuthor())
 
 	route.POST("/author/create", h.CreateAuthor())

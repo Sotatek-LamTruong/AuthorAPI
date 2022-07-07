@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -28,19 +29,13 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var res *dto.ListAuthor
 		var err *errors.AppError
-
 		res, err = h.authorServices.GetAllAuthors()
-
 		if err != nil {
 			panic(err.Error())
 		}
-		out, errors := json.MarshalIndent(res, " ", "     ")
 
-		if errors != nil {
-			panic(err.Error())
-		}
-		fmt.Println(out)
-
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, res.Authors)
 	}
 }
 
