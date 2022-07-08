@@ -12,6 +12,7 @@ type AuthorRepository interface {
 	List() ([]models.Author, *errors.AppError)
 	Create(author *models.Author) *errors.AppError
 	Get(id int) (*models.Author, *errors.AppError)
+	GetByBook(bookID int) (*models.Author, *errors.AppError)
 }
 
 type DefaulAuthorRepository struct {
@@ -74,7 +75,7 @@ func (r DefaulAuthorRepository) Get(id int) (*models.Author, *errors.AppError) {
 	return author, nil
 }
 
-func (r DefaulAuthorRepository) getByBook(id int) (*models.Author, *errors.AppError) {
+func (r DefaulAuthorRepository) GetByBook(id int) (*models.Author, *errors.AppError) {
 	var author = new(models.Author)
 	query := fmt.Sprintf("SELECT idAuthor,Name from author_book_db.book as a join author_book_db.author as b on a.authorId = b.idAuthor where idbook = %d", id)
 	result := r.db.QueryRow(query)

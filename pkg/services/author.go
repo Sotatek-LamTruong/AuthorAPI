@@ -63,7 +63,7 @@ func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) *errors.AppError
 }
 
 func (d DefaultAuthor) GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, *errors.AppError) {
-	author, err := d.repo.Get(bookID)
+	author, err := d.repo.GetByBook(bookID)
 
 	if err != nil {
 		return nil, err

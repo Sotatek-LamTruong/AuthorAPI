@@ -12,7 +12,7 @@ import (
 func AuthorRoutes(route *gin.RouterGroup) {
 	h := handlers.NewAuthorHandlers(services.NewAuthor(repository.NewAuthorRepo(config.DB)))
 	route.GET("/list", h.GetAllAuthors())
-	route.GET("/get/:id", h.GetAuthor())
 	route.POST("/create", h.CreateAuthor())
+	route.GET("/get/:id", h.GetAuthor())
 	route.GET("/getByBook/:id", h.GetAuthorByBook())
 }
