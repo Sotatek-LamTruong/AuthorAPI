@@ -11,8 +11,8 @@ import (
 type AuthorServices interface {
 	GetAllAuthors() (*dto.ListAuthor, *errors.AppError)
 	GetAuthor(id int) (*dto.GetAuthorRes, *errors.AppError)
-	CreateAuthor(*dto.CreateAuthorReq) *errors.AppError
-	GetAuthorByBook(*dto.GetAuthorByBookReq) (*dto.GetAuthorByBookRes, *errors.AppError)
+	CreateAuthor(dto.CreateAuthorReq) *errors.AppError
+	GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, *errors.AppError)
 }
 
 type DefaultAuthor struct {
@@ -49,7 +49,7 @@ func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, *errors.AppError) {
 
 }
 
-func (d DefaultAuthor) CreateAuthor(author *dto.CreateAuthorReq) *errors.AppError {
+func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) *errors.AppError {
 	result := models.Author{
 		Name: author.Name,
 	}
@@ -62,8 +62,8 @@ func (d DefaultAuthor) CreateAuthor(author *dto.CreateAuthorReq) *errors.AppErro
 	return nil
 }
 
-func (d DefaultAuthor) GetAuthorByBook(book *dto.GetAuthorByBookReq) (*dto.GetAuthorByBookRes, *errors.AppError) {
-	author, err := d.repo.Get(book.Book.AuthorId)
+func (d DefaultAuthor) GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, *errors.AppError) {
+	author, err := d.repo.Get(bookID)
 
 	if err != nil {
 		return nil, err

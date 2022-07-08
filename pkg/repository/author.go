@@ -44,12 +44,12 @@ func (r DefaulAuthorRepository) List() ([]models.Author, *errors.AppError) {
 }
 
 func (r DefaulAuthorRepository) Create(author *models.Author) *errors.AppError {
-	query := fmt.Sprintf("INSERT INTO author_book_db.author (Name) VALUES (%v)", author.Name)
-
+	query := fmt.Sprintf("INSERT INTO author_book_db.author (Name) VALUES ('%v')", author.Name)
+	fmt.Println(author.Name)
 	result, err := r.db.Exec(query)
 
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
 
 	lastID, err := result.LastInsertId()
@@ -63,14 +63,23 @@ func (r DefaulAuthorRepository) Create(author *models.Author) *errors.AppError {
 }
 
 func (r DefaulAuthorRepository) Get(id int) (*models.Author, *errors.AppError) {
-	var author *models.Author
-	query := fmt.Sprintf("ISELECT * FROM author_book_db.author where idAuthor = %d", id)
-	result, err := r.db.Query(query)
-	if err != nil {
-		panic(err.Error())
-	}
+	var author = new(models.Author)
+	query := fmt.Sprintf("SELECT * FROM author_book_db.author where idAuthor = %d", id)
+	result := r.db.QueryRow(query)
 
-	err = result.Scan(&author.IdAuthor, &author.Name)
+	err := result.Scan(&author.IdAuthor, &author.Name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return author, nil
+}
+
+func (r DefaulAuthorRepository) getByBook(id int) (*models.Author, *errors.AppError) {
+	var author = new(models.Author)
+	query := fmt.Sprintf("SELECT idAuthor,Name from author_book_db.book as a join author_book_db.author as b on a.authorId = b.idAuthor where idbook = %d", id)
+	result := r.db.QueryRow(query)
+
+	err := result.Scan(&author.IdAuthor, &author.Name)
 	if err != nil {
 		log.Fatal(err)
 	}

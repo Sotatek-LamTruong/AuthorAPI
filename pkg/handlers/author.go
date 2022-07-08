@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/errors"
 	"book-author/pkg/services"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-chi/chi"
 )
 
 type AuthorHandlers struct {
@@ -41,7 +39,7 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 
 func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authID := chi.URLParam(ctx.Request, "id")
+		authID := ctx.Param("id")
 
 		var res *dto.GetAuthorRes
 		var err *errors.AppError
@@ -51,26 +49,26 @@ func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
 		}
 		res, err = h.authorServices.GetAuthor(id)
 
-		out, errors := json.MarshalIndent(res, " ", "     ")
-
-		if errors != nil {
+		if err != nil {
 			panic(err.Error())
 		}
 
-		fmt.Println(out)
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, res.Author)
 	}
 }
 
 func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
-		var req *dto.CreateAuthorReq
-		var err *errors.AppError
-
-		err = h.authorServices.CreateAuthor(req)
-
+		var req dto.CreateAuthorReq
+		err := ctx.BindJSON(&req)
 		if err != nil {
-			panic(err.Error())
+			log.Fatalln(err)
+		}
+		erros := h.authorServices.CreateAuthor(req)
+
+		if erros != nil {
+			log.Fatalln(erros)
 		}
 		fmt.Println("Insert success")
 	}
@@ -78,21 +76,20 @@ func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 
 func (h AuthorHandlers) GetAuthorByBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var req *dto.GetAuthorByBookReq
+		bookID := ctx.Param("id")
 		var err *errors.AppError
-
-		res, err := h.authorServices.GetAuthorByBook(req)
+		id, erros := StrToInt(bookID)
+		if erros != nil {
+			log.Fatal(erros)
+		}
+		res, err := h.authorServices.GetAuthorByBook(id)
 
 		if err != nil {
 			panic(err.Error())
 		}
 
-		out, errors := json.MarshalIndent(res, " ", "     ")
-
-		if errors != nil {
-			panic(err.Error())
-		}
-		fmt.Println(out)
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, res.Author)
 	}
 }
 
