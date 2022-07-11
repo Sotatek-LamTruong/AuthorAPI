@@ -10,6 +10,8 @@ func SetupRoute(app *gin.Engine) {
 	})
 	v1 := app.Group("/author")
 	v2 := app.Group("/category")
+	v3 := app.Group("/book")
 	CateRoutes(v2)
 	AuthorRoutes(v1)
+	BookRoutes(v3)
 }
