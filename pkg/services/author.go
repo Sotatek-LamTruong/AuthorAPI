@@ -2,17 +2,16 @@ package services
 
 import (
 	"book-author/pkg/dto"
-	"book-author/pkg/errors"
 	"book-author/pkg/models"
 	"book-author/pkg/repository"
 	"fmt"
 )
 
 type AuthorServices interface {
-	GetAllAuthors() (*dto.ListAuthor, *errors.AppError)
-	GetAuthor(id int) (*dto.GetAuthorRes, *errors.AppError)
-	CreateAuthor(dto.CreateAuthorReq) *errors.AppError
-	GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, *errors.AppError)
+	GetAllAuthors() (*dto.ListAuthor, error)
+	GetAuthor(id int) (*dto.GetAuthorRes, error)
+	CreateAuthor(dto.CreateAuthorReq) error
+	GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, error)
 }
 
 type DefaultAuthor struct {
@@ -25,10 +24,10 @@ func NewAuthor(repo repository.AuthorRepository) AuthorServices {
 	}
 }
 
-func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, *errors.AppError) {
+func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 	authors, err := d.repo.List()
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 	for _, author := range authors {
 		fmt.Println(author)
@@ -38,18 +37,18 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, *errors.AppError) {
 	}, nil
 }
 
-func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, *errors.AppError) {
+func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
 	author, err := d.repo.Get(id)
 
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 
 	return &dto.GetAuthorRes{Author: author}, nil
 
 }
 
-func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) *errors.AppError {
+func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
 	result := models.Author{
 		Name: author.Name,
 	}
@@ -57,16 +56,16 @@ func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) *errors.AppError
 	err := d.repo.Create(&result)
 
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err)
 	}
 	return nil
 }
 
-func (d DefaultAuthor) GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, *errors.AppError) {
+func (d DefaultAuthor) GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, error) {
 	author, err := d.repo.GetByBook(bookID)
 
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 
 	return &dto.GetAuthorByBookRes{Author: author}, nil

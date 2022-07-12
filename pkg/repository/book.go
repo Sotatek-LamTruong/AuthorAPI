@@ -25,7 +25,8 @@ func NewBookRepo(db *sql.DB) DefaulBookRepository {
 }
 
 func (b DefaulBookRepository) Create(book *models.Book) error {
-	query := fmt.Sprintf("INSERT INTO `author_book_db`.`book`(`bookname`,`authorId`,`categoryId`) VALUES (%v,%d,%d)", book.Bookname, book.Author.IdAuthor, book.Category.CategoryId)
+	fmt.Println(book)
+	query := fmt.Sprintf("INSERT INTO author_book_db.book (bookname,authorId,categoryId) VALUES ('%v',%d,%d);", book.Bookname, book.Author.IdAuthor, book.Category.CategoryId)
 
 	result, err := b.db.Exec(query)
 

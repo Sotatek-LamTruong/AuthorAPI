@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"book-author/pkg/dto"
-	"book-author/pkg/errors"
 	"book-author/pkg/services"
 	"fmt"
 	"log"
@@ -26,7 +25,7 @@ func NewAuthorHandlers(authorServices services.AuthorServices) AuthorHandlers {
 func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var res *dto.ListAuthor
-		var err *errors.AppError
+		var err error
 		res, err = h.authorServices.GetAllAuthors()
 		if err != nil {
 			panic(err.Error())
@@ -42,7 +41,7 @@ func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
 		authID := ctx.Param("id")
 
 		var res *dto.GetAuthorRes
-		var err *errors.AppError
+		var err error
 		id, erros := StrToInt(authID)
 		if erros != nil {
 			log.Fatal(erros)
@@ -77,7 +76,7 @@ func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 func (h AuthorHandlers) GetAuthorByBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bookID := ctx.Param("id")
-		var err *errors.AppError
+		var err error
 		id, erros := StrToInt(bookID)
 		if erros != nil {
 			log.Fatal(erros)

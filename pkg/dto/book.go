@@ -3,10 +3,10 @@ package dto
 import "book-author/pkg/models"
 
 type AddBookReq struct {
-	BookId   int             `json:"id"`
-	BookName string          `json:"name"`
-	Author   models.Author   `json:"author"`
-	Category models.Category `json:"category"`
+	BookId     int    `json:"id"`
+	BookName   string `json:"name"`
+	AuthorId   int    `json:"author_id"`
+	CategoryId int    `json:"category_id"`
 }
 
 // type addBookRes struct {
