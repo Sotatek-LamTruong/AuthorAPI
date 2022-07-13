@@ -9,8 +9,8 @@ import (
 
 type CategoryServices interface {
 	CreateCategory(*dto.CreateCateReq) error
-	GetCateByBook(bookID int) (*dto.GetCateByBookRes, error)
-	GetCateByName(name string) (*dto.GetCateByNameRes, error)
+	GetCateById(id int) (*dto.GetCateRes, error)
+	// GetCateByName(name string) (*dto.GetCateRes, error)
 }
 
 type DefaultCategory struct {
@@ -35,26 +35,28 @@ func (d DefaultCategory) CreateCategory(cate *dto.CreateCateReq) error {
 	return nil
 }
 
-func (d DefaultCategory) GetCateByBook(bookID int) (*dto.GetCateByBookRes, error) {
-	cate, err := d.repo.GetByBook(bookID)
+func (d DefaultCategory) GetCateById(Id int) (*dto.GetCateRes, error) {
+	cate, books, err := d.repo.GetById(Id)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	return &dto.GetCateByBookRes{
-		Category: cate,
+	return &dto.GetCateRes{
+		CategoryId:   cate.CategoryId,
+		CategoryName: cate.CategoryName,
+		Books:        books,
 	}, nil
 }
 
-func (d DefaultCategory) GetCateByName(name string) (*dto.GetCateByNameRes, error) {
-	cate, err := d.repo.GetByName(name)
+// func (d DefaultCategory) GetCateByName(name string) (*dto.GetCateRes, error) {
+// 	cate, err := d.repo.GetByName(name)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
+// 	if err != nil {
+// 		log.Fatalln(err)
+// 	}
 
-	return &dto.GetCateByNameRes{
-		Category: cate,
-	}, nil
-}
+// 	return &dto.GetCateRes{
+// 		Category: cate,
+// 	}, nil
+// }

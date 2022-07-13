@@ -26,7 +26,7 @@ func NewBookRepo(db *sql.DB) DefaulBookRepository {
 
 func (b DefaulBookRepository) Create(book *models.Book) error {
 	fmt.Println(book)
-	query := fmt.Sprintf("INSERT INTO author_book_db.book (bookname,authorId,categoryId) VALUES ('%v',%d,%d);", book.Bookname, book.Author.IdAuthor, book.Category.CategoryId)
+	query := fmt.Sprintf("INSERT INTO author_book_db.book (bookname,authorId,categoryId) VALUES ('%v',%d,%d);", book.BookName, book.CategoryId)
 
 	result, err := b.db.Exec(query)
 
@@ -56,7 +56,7 @@ func (b DefaulBookRepository) GetByAuthor(authId int) ([]models.Book, error) {
 	result, err := b.db.Query(query)
 
 	for result.Next() {
-		err := result.Scan(&book.Idbook, &book.Bookname, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
+		err := result.Scan(&book.IdBook, &book.BookName, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
 
 		if err != nil {
 			fmt.Println(err)
@@ -79,14 +79,13 @@ func (b DefaulBookRepository) GetByCate(cateId int) ([]models.Book, error) {
 	book := models.Book{}
 	cate := models.Category{}
 	author := models.Author{}
-	query := fmt.Sprintf("SELECT book.idbook, book.bookname, b.idCategory,b.nameCategory, c.idAuthor,c.Name FROM author_book_db.book as book join author_book_db.category as b on book.categoryId = b.idCategory join author_book_db.author as c on book.authorId = c.idAuthor where categoryId = %d", cateId)
+	query := fmt.Sprintf("SELECT book.idbook, book.bookname, b.idCategory,b.nameCategory, c.idAuthor, c.Name FROM author_book_db.book as book join author_book_db.category as b on book.categoryId = b.idCategory join author_book_db.author as c on book.authorId = c.idAuthor where categoryId = %d", cateId)
 
 	result, err := b.db.Query(query)
 
 	for result.Next() {
-		err := result.Scan(&book.Idbook, &book.Bookname, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
-		book.Category = cate
-		book.Author = author
+		err := result.Scan(&book.IdBook, &book.BookName, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
+
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -111,7 +110,7 @@ func (b DefaulBookRepository) GetByName(name string) (*models.Book, error) {
 	}
 	result := query.QueryRow("%" + name + "%")
 
-	err = result.Scan(&book.Idbook, &book.Bookname, &book.Category.CategoryName, &book.Author.Name, &book.Author.IdAuthor, &book.Category.CategoryId)
+	err = result.Scan(&book.IdBook, &book.BookName)
 	if err != nil {
 		fmt.Println(err)
 	}

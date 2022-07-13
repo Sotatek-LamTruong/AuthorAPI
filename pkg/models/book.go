@@ -1,8 +1,7 @@
 package models
 
 type Book struct {
-	Idbook   int      `json:"id"`
-	Bookname string   `json:"name"`
-	Author   Author   `json:"author"`
-	Category Category `json:"category"`
+	IdBook     int    `json:"id"`
+	BookName   string `json:"name_book"`
+	CategoryId int    `json:"category_id,omitempty"`
 }

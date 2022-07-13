@@ -13,7 +13,7 @@ func CateRoutes(route *gin.RouterGroup) {
 	h := handlers.NewCategoryHandlers(services.NewCategory(repository.NewCategoryRepo(config.DB)))
 
 	route.POST("/create", h.CreateCategory())
-	route.GET("/getByBook/:id", h.GetCateByBook())
-	route.GET("/getByName/:name", h.GetCateByName())
+	route.GET("/getById/:id", h.GetCateById())
+	// route.GET("/getByName/:name", h.GetCateByName())
 
 }

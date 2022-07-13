@@ -37,7 +37,7 @@ func (h CategoryHandlers) CreateCategory() gin.HandlerFunc {
 	}
 }
 
-func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
+func (h CategoryHandlers) GetCateById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bookID := ctx.Param("id")
 
@@ -46,30 +46,30 @@ func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
 		if err != nil {
 			errResp.Message = err.Error()
 		}
-		res, err := h.cateServices.GetCateByBook(id)
+		res, err := h.cateServices.GetCateById(id)
 
 		if err != nil {
-			panic(err.Error())
+			errResp.Message = err.Error()
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Category)
+		ctx.JSON(http.StatusOK, res)
 	}
 }
 
-func (h CategoryHandlers) GetCateByName() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		name := ctx.Param("name")
-		fmt.Println(name)
-		var err error
+// func (h CategoryHandlers) GetCateByName() gin.HandlerFunc {
+// 	return func(ctx *gin.Context) {
+// 		name := ctx.Param("name")
+// 		fmt.Println(name)
+// 		var err error
 
-		res, err := h.cateServices.GetCateByName(name)
+// 		res, err := h.cateServices.GetCateByName(name)
 
-		if err != nil {
-			panic(err.Error())
-		}
+// 		if err != nil {
+// 			panic(err.Error())
+// 		}
 
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Category)
-	}
-}
+// 		ctx.Header("content-type", "application/json")
+// 		ctx.JSON(http.StatusOK, res)
+// 	}
+// }

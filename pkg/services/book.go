@@ -26,9 +26,8 @@ func NewBook(repo repository.BookRepository) BookServices {
 
 func (b DefaultBook) CreateBook(book *dto.AddBookReq) error {
 	result := models.Book{
-		Bookname: book.BookName,
-		Author:   models.Author{IdAuthor: book.AuthorId},
-		Category: models.Category{CategoryId: book.CategoryId},
+		BookName:   book.BookName,
+		CategoryId: book.CategoryId,
 	}
 	fmt.Println(result)
 

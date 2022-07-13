@@ -9,7 +9,7 @@ import (
 
 type CategoryRepository interface {
 	Create(cate *models.Category) error
-	GetByBook(id int) (*models.Category, error)
+	GetById(id int) (*models.Category, []models.Book, error)
 	GetByName(name string) (*models.Category, error)
 }
 
@@ -43,18 +43,28 @@ func (r DefaulCateRepository) Create(cate *models.Category) error {
 
 }
 
-func (r DefaulCateRepository) GetByBook(bookID int) (*models.Category, error) {
+func (r DefaulCateRepository) GetById(id int) (*models.Category, []models.Book, error) {
 	cate := models.Category{}
-	query := fmt.Sprintf("SELECT idCategory,nameCategory from author_book_db.book as a join author_book_db.category as b on a.categoryId = b.idCategory where idbook = %d", bookID)
-	result := r.db.QueryRow(query)
+	var books []models.Book
 
-	err := result.Scan(&cate.CategoryId, &cate.CategoryName)
+	query := fmt.Sprintf("SELECT categoryId, nameCategory, idbook, bookname FROM author_book_db.book as a join author_book_db.category as b on a.categoryId = b.idCategory where categoryId = %d", id)
+	result, err := r.db.Query(query)
+
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &cate, nil
-}
+	for result.Next() {
+		book := models.Book{}
 
+		err := result.Scan(&cate.CategoryId, &cate.CategoryName, &book.IdBook, &book.BookName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(book)
+		books = append(books, book)
+	}
+	return &cate, books, nil
+}
 func (r DefaulCateRepository) GetByName(name string) (*models.Category, error) {
 	fmt.Println(name)
 	var cate = new(models.Category)
