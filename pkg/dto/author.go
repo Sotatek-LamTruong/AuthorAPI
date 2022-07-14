@@ -15,15 +15,15 @@ type AuthorDTO struct {
 	Books []models.Book `json:"books,omitempty"`
 }
 
-//
 type GetAuthorReq struct {
 	AuthorID   int    `json:"author_id"`
 	AuthorName string `json:"author_name"`
 }
 
 type GetAuthorRes struct {
-	AuthorId   int    `json:"author"`
-	AuthorName string `json:"author_name"`
+	AuthorId   int           `json:"author"`
+	AuthorName string        `json:"author_name"`
+	Books      []models.Book `json:"books"`
 }
 
 //
@@ -38,6 +38,13 @@ type CreateAuthorRes struct {
 
 //
 
-type GetAuthorByBookRes struct {
-	Author *models.Author `json:"author"`
+type GetAuthorsByBook struct {
+	Authors []GetAuthorByBook `json:"authors"`
+}
+
+type GetAuthorByBook struct {
+	BookId     int             `json:"book_id"`
+	BookName   string          `json:"book_name"`
+	CategoryId int             `json:"category_id"`
+	Authors    []models.Author `json:"authors"`
 }

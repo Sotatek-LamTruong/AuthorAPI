@@ -36,26 +36,26 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 	}
 }
 
-// func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
-// 	return func(ctx *gin.Context) {
-// 		authID := ctx.Param("id")
+func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		authID := ctx.Param("id")
 
-// 		var res *dto.GetAuthorRes
-// 		var err error
-// 		id, erros := StrToInt(authID)
-// 		if erros != nil {
-// 			log.Fatal(erros)
-// 		}
-// 		res, err = h.authorServices.GetAuthor(id)
+		var res *dto.GetAuthorRes
+		var err error
+		id, erros := StrToInt(authID)
+		if erros != nil {
+			log.Fatal(erros)
+		}
+		res, err = h.authorServices.GetAuthor(id)
 
-// 		if err != nil {
-// 			panic(err.Error())
-// 		}
+		if err != nil {
+			panic(err.Error())
+		}
 
-// 		ctx.Header("content-type", "application/json")
-// 		ctx.JSON(http.StatusOK, res.Author)
-// 	}
-// }
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, res)
+	}
+}
 
 func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -75,20 +75,15 @@ func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 
 func (h AuthorHandlers) GetAuthorByBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		bookID := ctx.Param("id")
+		var res *dto.GetAuthorsByBook
 		var err error
-		id, erros := StrToInt(bookID)
-		if erros != nil {
-			log.Fatal(erros)
-		}
-		res, err := h.authorServices.GetAuthorByBook(id)
-
+		res, err = h.authorServices.GetAuthorsByBook()
 		if err != nil {
 			panic(err.Error())
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Author)
+		ctx.JSON(http.StatusOK, res.Authors)
 	}
 }
 

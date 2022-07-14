@@ -9,9 +9,9 @@ import (
 
 type AuthorServices interface {
 	GetAllAuthors() (*dto.ListAuthor, error)
-	// GetAuthor(id int) (*dto.GetAuthorRes, error)
+	GetAuthor(id int) (*dto.GetAuthorRes, error)
 	CreateAuthor(dto.CreateAuthorReq) error
-	GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, error)
+	GetAuthorsByBook() (*dto.GetAuthorsByBook, error)
 }
 
 type DefaultAuthor struct {
@@ -46,16 +46,23 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 	}, nil
 }
 
-// func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
-// 	author, err := d.repo.Get(id)
+func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
+	author, err := d.repo.Get(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	books, err := d.repo.GetBookByAuthor(id)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
+	return &dto.GetAuthorRes{
+		AuthorId:   author.IdAuthor,
+		AuthorName: author.Name,
+		Books:      books,
+	}, nil
 
-// 	return &dto.GetAuthorRes{Author: author}, nil
-
-// }
+}
 
 func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
 	result := models.Author{
@@ -70,12 +77,28 @@ func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
 	return nil
 }
 
-func (d DefaultAuthor) GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, error) {
-	author, err := d.repo.GetByBook(bookID)
+func (d DefaultAuthor) GetAuthorsByBook() (*dto.GetAuthorsByBook, error) {
+	books, err := d.repo.GetAllBooks()
+	// book := dto.GetAuthorByBook{}
+	var list []dto.GetAuthorByBook
+	for _, b := range books {
+		book := dto.GetAuthorByBook{}
+		authors, err := d.repo.GetByBook(b.IdBook)
+		if err != nil {
+			fmt.Println(err)
+		}
+		book.Authors = authors
+		book.BookId = b.IdBook
+		book.BookName = b.BookName
+		book.CategoryId = b.CategoryId
 
+		list = append(list, book)
+	}
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return &dto.GetAuthorByBookRes{Author: author}, nil
+	return &dto.GetAuthorsByBook{
+		Authors: list,
+	}, nil
 }

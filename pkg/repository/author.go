@@ -9,10 +9,12 @@ import (
 
 type AuthorRepository interface {
 	GetAllAuthors() ([]models.Author, error)
+	GetAllBooks() ([]models.Book, error)
 	GetBookByAuthor(authId int) ([]models.Book, error)
+	GetAuthorByBook(bId int) ([]models.Author, error)
+	GetByBook(bookID int) ([]models.Author, error)
 	Create(author *models.Author) error
 	Get(id int) (*models.Author, error)
-	GetByBook(bookID int) (*models.Author, error)
 }
 
 type DefaulAuthorRepository struct {
@@ -48,6 +50,54 @@ func (r DefaulAuthorRepository) GetAllAuthors() ([]models.Author, error) {
 	return authors, nil
 }
 
+func (r DefaulAuthorRepository) GetAllBooks() ([]models.Book, error) {
+	var books []models.Book
+
+	result, err := r.db.Query("SELECT * FROM author_book_db.book")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for result.Next() {
+		book := models.Book{}
+		err := result.Scan(&book.IdBook, &book.BookName, &book.CategoryId)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		books = append(books, book)
+	}
+	return books, nil
+}
+
+func (b DefaulAuthorRepository) GetAuthorByBook(bId int) ([]models.Author, error) {
+	var authors []models.Author
+	query := fmt.Sprintf("SELECT bookid,bookname FROM author_book_db.author as a join author_book as b on a.idAuthor = b.authorid join book as c on b.bookid = c.idbook where bookid = %d", bId)
+
+	result, err := b.db.Query(query)
+
+	for result.Next() {
+		// cate := models.Category{}
+		author := models.Author{}
+		err := result.Scan(&author.IdAuthor, &author.Name)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		authors = append(authors, author)
+	}
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return authors, nil
+
+}
+
 func (b DefaulAuthorRepository) GetBookByAuthor(authId int) ([]models.Book, error) {
 	var books []models.Book
 	query := fmt.Sprintf("SELECT bookid,bookname,categoryId FROM author_book_db.author as a join author_book as b on a.idAuthor = b.authorid join book as c on b.bookid = c.idbook where idAuthor = %d", authId)
@@ -74,32 +124,6 @@ func (b DefaulAuthorRepository) GetBookByAuthor(authId int) ([]models.Book, erro
 
 }
 
-func (r DefaulAuthorRepository) List() ([]models.Author, []models.Book, error) {
-	authors, err := r.GetAllAuthors()
-	if err != nil {
-		fmt.Println(err)
-	}
-	var books []models.Book
-	result, err := r.db.Query("SELECT idAuthor,Name,bookid,bookname,categoryId FROM author as a join author_book as b on a.idAuthor = b.authorid join book as c on c.idbook = b.bookid join category as d on d.idCategory = c.categoryId")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer result.Close()
-	for result.Next() {
-		author := models.Author{}
-		book := models.Book{}
-		err := result.Scan(&author.IdAuthor, &author.Name, &book.IdBook, &book.BookName, &book.CategoryId)
-		if err != nil {
-			panic(err.Error())
-		}
-		authors = append(authors, author)
-		books = append(books, book)
-		fmt.Println(authors)
-	}
-	return authors, books, nil
-}
-
 func (r DefaulAuthorRepository) Create(author *models.Author) error {
 	query := fmt.Sprintf("INSERT INTO author_book_db.author (Name) VALUES ('%v')", author.Name)
 	fmt.Println(author.Name)
@@ -119,21 +143,31 @@ func (r DefaulAuthorRepository) Create(author *models.Author) error {
 	return nil
 }
 
-func (r DefaulAuthorRepository) Get(id int) (*models.Author, error) {
-	var author = new(models.Author)
-	query := fmt.Sprintf("SELECT * FROM author_book_db.author where idAuthor = %d", id)
-	result := r.db.QueryRow(query)
+func (r DefaulAuthorRepository) GetByBook(id int) ([]models.Author, error) {
+	var authors []models.Author
+	query := fmt.Sprintf("SELECT authorid,Name FROM author_book_db.author as a join author_book as b on a.idAuthor = b.authorid join book as c on b.bookid = c.idbook where bookid = %d", id)
+	result, err := r.db.Query(query)
+	// if err != nil {
+	// 	fmt.Println("Fail")
+	// }
 
-	err := result.Scan(&author.IdAuthor, &author.Name)
+	for result.Next() {
+		author := models.Author{}
+		err := result.Scan(&author.IdAuthor, &author.Name)
+		if err != nil {
+			fmt.Println("Scan fail")
+		}
+		authors = append(authors, author)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
-	return author, nil
+	return authors, nil
 }
 
-func (r DefaulAuthorRepository) GetByBook(id int) (*models.Author, error) {
+func (r DefaulAuthorRepository) Get(id int) (*models.Author, error) {
 	var author = new(models.Author)
-	query := fmt.Sprintf("SELECT idAuthor,Name from author_book_db.book as a join author_book_db.author as b on a.authorId = b.idAuthor where idbook = %d", id)
+	query := fmt.Sprintf("SELECT * FROM author_book_db.author where idAuthor = %d;", id)
 	result := r.db.QueryRow(query)
 
 	err := result.Scan(&author.IdAuthor, &author.Name)
