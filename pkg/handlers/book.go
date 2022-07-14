@@ -87,3 +87,18 @@ func (b BookHandlers) GetBookByName() gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, res.Book)
 	}
 }
+
+func (b BookHandlers) UpdateAuthorByBook() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.UpdateAuthorByBookReq
+		aId, _ := StrToInt(ctx.Param("authid"))
+		bId, _ := StrToInt(ctx.Param("bookid"))
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			fmt.Println("Get data fail")
+		}
+		b.bookServices.UpdateAuthorByBook(aId, bId, &req)
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, "Update Success")
+	}
+}

@@ -32,3 +32,7 @@ type GetBookRes struct {
 type GetBookByNameRes struct {
 	Book *models.Book
 }
+
+type UpdateAuthorByBookReq struct {
+	Name string `json:"name"`
+}

@@ -12,6 +12,8 @@ type BookRepository interface {
 	GetByAuthor(authId int) ([]models.Book, error)
 	GetByCate(cateID int) ([]models.Book, error)
 	GetByName(name string) (*models.Book, error)
+	UpdateAuthor(aId int, name string) error
+	GetAuthorByBook(BookId int, AuthorId int) (*models.Author, error)
 }
 
 type DefaulBookRepository struct {
@@ -44,6 +46,28 @@ func (b DefaulBookRepository) Create(book *models.Book) error {
 
 	return nil
 
+}
+
+func (b DefaulBookRepository) UpdateAuthor(aId int, name string) error {
+	query := fmt.Sprintf("UPDATE author SET Name = '%v' WHERE idAuthor = %d", name, aId)
+
+	_, err := b.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Update success")
+	return nil
+}
+
+func (b DefaulBookRepository) GetAuthorByBook(BookId int, AuthorId int) (*models.Author, error) {
+	author := models.Author{}
+
+	query := fmt.Sprintf("SELECT idAuthor,Name,bookid,bookname,categoryId FROM author as a join author_book as b on a.idAuthor = b.authorid join book as c on c.idbook = b.bookid WHERE idAuthor = %d AND bookid = %d", AuthorId, BookId)
+
+	result := b.db.QueryRow(query)
+
+	result.Scan(&author.IdAuthor, &author.Name)
+	return &author, nil
 }
 
 func (b DefaulBookRepository) GetByAuthor(authId int) ([]models.Book, error) {

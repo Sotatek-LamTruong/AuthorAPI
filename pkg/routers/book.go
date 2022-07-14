@@ -16,4 +16,5 @@ func BookRoutes(route *gin.RouterGroup) {
 	route.GET("/getByCate/:id", h.GetBookByCate())
 	route.GET("/getByAuthor/:id", h.GetBookByAuthor())
 	route.GET("/getByName/:name", h.GetBookByName())
+	route.PUT("/update/:authid/:bookid", h.UpdateAuthorByBook())
 }

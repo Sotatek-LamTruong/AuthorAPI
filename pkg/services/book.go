@@ -12,6 +12,7 @@ type BookServices interface {
 	GetBookByCate(bookId int) (*dto.GetBookRes, error)
 	GetBookByAuthor(authorId int) (*dto.GetBookRes, error)
 	GetBookByName(name string) (*dto.GetBookByNameRes, error)
+	UpdateAuthorByBook(aId int, bId int, name *dto.UpdateAuthorByBookReq) error
 }
 
 type DefaultBook struct {
@@ -76,4 +77,13 @@ func (b DefaultBook) GetBookByName(name string) (*dto.GetBookByNameRes, error) {
 	return &dto.GetBookByNameRes{
 		Book: book,
 	}, nil
+}
+
+func (b DefaultBook) UpdateAuthorByBook(aId int, bId int, req *dto.UpdateAuthorByBookReq) error {
+	_, err := b.repo.GetAuthorByBook(bId, aId)
+	if err != nil {
+		fmt.Println("Author not exist")
+	}
+	b.repo.UpdateAuthor(aId, req.Name)
+	return nil
 }
