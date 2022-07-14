@@ -5,6 +5,7 @@ import (
 	"book-author/pkg/errors"
 	"book-author/pkg/services"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,8 +33,8 @@ func (h CategoryHandlers) CreateCategory() gin.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-
-		fmt.Println("Insert success")
+		ctx.Writer.Status()
+		log.Println("Insert success")
 	}
 }
 
@@ -57,19 +58,22 @@ func (h CategoryHandlers) GetCateById() gin.HandlerFunc {
 	}
 }
 
-// func (h CategoryHandlers) GetCateByName() gin.HandlerFunc {
-// 	return func(ctx *gin.Context) {
-// 		name := ctx.Param("name")
-// 		fmt.Println(name)
-// 		var err error
+func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var err error
+		fmt.Println(id)
+		input, err := StrToInt(id)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		res, err := h.cateServices.GetCateByBook(input)
 
-// 		res, err := h.cateServices.GetCateByName(name)
+		if err != nil {
+			fmt.Println("Fail")
+		}
 
-// 		if err != nil {
-// 			panic(err.Error())
-// 		}
-
-// 		ctx.Header("content-type", "application/json")
-// 		ctx.JSON(http.StatusOK, res)
-// 	}
-// }
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(http.StatusOK, res)
+	}
+}

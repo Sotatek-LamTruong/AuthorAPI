@@ -5,16 +5,25 @@ import (
 )
 
 type ListAuthor struct {
-	Authors []models.Author `json:"authors"`
+	Authors []AuthorDTO `json:"authors"`
+}
+
+type AuthorDTO struct {
+	AuthorId   int    `json:"author_id"`
+	AuthorName string `json:"author_name"`
+	// Category   models.Category `json:"category,omitempty"`
+	Books []models.Book `json:"books,omitempty"`
 }
 
 //
 type GetAuthorReq struct {
-	AuthorID int `json:"author_id"`
+	AuthorID   int    `json:"author_id"`
+	AuthorName string `json:"author_name"`
 }
 
 type GetAuthorRes struct {
-	Author *models.Author `json:"author"`
+	AuthorId   int    `json:"author"`
+	AuthorName string `json:"author_name"`
 }
 
 //
@@ -28,11 +37,6 @@ type CreateAuthorRes struct {
 }
 
 //
-
-type GetAuthorByBookReq struct {
-	Book *models.Book `json:"book"`
-	// BookId int          `json:"book_id"`
-}
 
 type GetAuthorByBookRes struct {
 	Author *models.Author `json:"author"`

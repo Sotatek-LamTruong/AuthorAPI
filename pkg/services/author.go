@@ -9,7 +9,7 @@ import (
 
 type AuthorServices interface {
 	GetAllAuthors() (*dto.ListAuthor, error)
-	GetAuthor(id int) (*dto.GetAuthorRes, error)
+	// GetAuthor(id int) (*dto.GetAuthorRes, error)
 	CreateAuthor(dto.CreateAuthorReq) error
 	GetAuthorByBook(bookID int) (*dto.GetAuthorByBookRes, error)
 }
@@ -25,28 +25,37 @@ func NewAuthor(repo repository.AuthorRepository) AuthorServices {
 }
 
 func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
-	authors, err := d.repo.List()
+	authors, err := d.repo.GetAllAuthors()
+	auth := dto.AuthorDTO{}
+	var list []dto.AuthorDTO
 	if err != nil {
 		fmt.Println(err)
 	}
 	for _, author := range authors {
-		fmt.Println(author)
+		books, err := d.repo.GetBookByAuthor(author.IdAuthor)
+		if err != nil {
+			fmt.Println(err)
+		}
+		auth.AuthorId = author.IdAuthor
+		auth.AuthorName = author.Name
+		auth.Books = books
+		list = append(list, auth)
 	}
 	return &dto.ListAuthor{
-		Authors: authors,
+		Authors: list,
 	}, nil
 }
 
-func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
-	author, err := d.repo.Get(id)
+// func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
+// 	author, err := d.repo.Get(id)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
 
-	return &dto.GetAuthorRes{Author: author}, nil
+// 	return &dto.GetAuthorRes{Author: author}, nil
 
-}
+// }
 
 func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
 	result := models.Author{

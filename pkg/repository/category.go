@@ -10,7 +10,7 @@ import (
 type CategoryRepository interface {
 	Create(cate *models.Category) error
 	GetById(id int) (*models.Category, []models.Book, error)
-	GetByName(name string) (*models.Category, error)
+	GetByBook(id int) (*models.Category, error)
 }
 
 type DefaulCateRepository struct {
@@ -65,17 +65,15 @@ func (r DefaulCateRepository) GetById(id int) (*models.Category, []models.Book, 
 	}
 	return &cate, books, nil
 }
-func (r DefaulCateRepository) GetByName(name string) (*models.Category, error) {
-	fmt.Println(name)
-	var cate = new(models.Category)
-	query, err := r.db.Prepare("SELECT * FROM author_book_db.category where nameCategory like ? ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	result := query.QueryRow("%" + name + "%")
-	err = result.Scan(&cate.CategoryId, &cate.CategoryName)
+func (r DefaulCateRepository) GetByBook(id int) (*models.Category, error) {
+	var cate = models.Category{}
+	fmt.Println(id)
+	query := fmt.Sprintf("SELECT idCategory,nameCategory from category as a join book as b on a.idCategory = b.idbook where b.idbook = %d", id)
+	result := r.db.QueryRow(query)
+	err := result.Scan(&cate.CategoryId, &cate.CategoryName)
+	fmt.Println(cate)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return cate, nil
+	return &cate, nil
 }

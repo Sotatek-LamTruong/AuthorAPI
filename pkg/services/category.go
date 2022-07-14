@@ -4,13 +4,14 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/models"
 	"book-author/pkg/repository"
+	"fmt"
 	"log"
 )
 
 type CategoryServices interface {
 	CreateCategory(*dto.CreateCateReq) error
 	GetCateById(id int) (*dto.GetCateRes, error)
-	// GetCateByName(name string) (*dto.GetCateRes, error)
+	GetCateByBook(id int) (*dto.GetCateRes, error)
 }
 
 type DefaultCategory struct {
@@ -49,14 +50,16 @@ func (d DefaultCategory) GetCateById(Id int) (*dto.GetCateRes, error) {
 	}, nil
 }
 
-// func (d DefaultCategory) GetCateByName(name string) (*dto.GetCateRes, error) {
-// 	cate, err := d.repo.GetByName(name)
+func (d DefaultCategory) GetCateByBook(id int) (*dto.GetCateRes, error) {
+	fmt.Println(id)
+	cate, err := d.repo.GetByBook(id)
 
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
+	if err != nil {
+		fmt.Println("Fail")
+	}
 
-// 	return &dto.GetCateRes{
-// 		Category: cate,
-// 	}, nil
-// }
+	return &dto.GetCateRes{
+		CategoryId:   cate.CategoryId,
+		CategoryName: cate.CategoryName,
+	}, nil
+}

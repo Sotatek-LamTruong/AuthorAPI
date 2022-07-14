@@ -14,6 +14,6 @@ func CateRoutes(route *gin.RouterGroup) {
 
 	route.POST("/create", h.CreateCategory())
 	route.GET("/getById/:id", h.GetCateById())
-	// route.GET("/getByName/:name", h.GetCateByName())
+	route.GET("/getByBook/:id", h.GetCateByBook())
 
 }

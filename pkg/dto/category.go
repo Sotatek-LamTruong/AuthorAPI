@@ -18,7 +18,7 @@ type GetCateByBookReq struct {
 type GetCateRes struct {
 	CategoryId   int           `json:"id"`
 	CategoryName string        `json:"name"`
-	Books        []models.Book `json:"books"`
+	Books        []models.Book `json:"books,omitempty"`
 }
 
 type GetCateByNameReq struct {
