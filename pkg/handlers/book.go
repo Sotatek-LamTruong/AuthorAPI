@@ -32,7 +32,7 @@ func (b BookHandlers) CreateBook() gin.HandlerFunc {
 			fmt.Println("Create Fail")
 		}
 
-		fmt.Println("Insert success")
+		ctx.JSON(http.StatusOK, "Create success")
 	}
 }
 
@@ -43,11 +43,11 @@ func (b BookHandlers) GetBookByAuthor() gin.HandlerFunc {
 		// var errResp error
 		id, err := StrToInt(authId)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Convert fail")
 		}
 		res, err := b.bookServices.GetBookByAuthor(id)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println("Fail")
 		}
 
 		ctx.Header("content-type", "application/json")
@@ -66,7 +66,7 @@ func (b BookHandlers) GetBookByCate() gin.HandlerFunc {
 		}
 		res, err := b.bookServices.GetBookByCate(id)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println("Fail")
 		}
 
 		ctx.Header("content-type", "application/json")
