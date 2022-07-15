@@ -45,7 +45,7 @@ func (b DefaultBook) GetBookByCate(cateId int) (*dto.GetBookRes, error) {
 	books, err := b.repo.GetByCate(cateId)
 
 	if err != nil {
-		fmt.Println("Fail")
+		return nil, err
 	}
 
 	return &dto.GetBookRes{
@@ -58,7 +58,7 @@ func (b DefaultBook) GetBookByAuthor(authorId int) (*dto.GetBookRes, error) {
 	books, err := b.repo.GetByAuthor(authorId)
 
 	if err != nil {
-		fmt.Println("Fail")
+		return nil, err
 	}
 
 	return &dto.GetBookRes{
@@ -71,7 +71,7 @@ func (b DefaultBook) GetBookByName(name string) (*dto.GetBookByNameRes, error) {
 	book, err := b.repo.GetByName(name)
 
 	if err != nil {
-		fmt.Println("Fail")
+		return nil, err
 	}
 
 	return &dto.GetBookByNameRes{

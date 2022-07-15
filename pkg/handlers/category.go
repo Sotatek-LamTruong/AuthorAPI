@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"book-author/pkg/dto"
-	"book-author/pkg/errors"
 	"book-author/pkg/services"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,10 +26,12 @@ func (h CategoryHandlers) CreateCategory() gin.HandlerFunc {
 		errs := ctx.BindJSON(&req)
 		if errs != nil {
 			fmt.Println("Convert fail")
+			return
 		}
 		err = h.cateServices.CreateCategory(&req)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 		ctx.Writer.Status()
 		log.Println("Insert success")
@@ -42,19 +42,20 @@ func (h CategoryHandlers) GetCateById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bookID := ctx.Param("id")
 
-		var errResp *errors.AppError
 		id, err := StrToInt(bookID)
 		if err != nil {
-			errResp.Message = err.Error()
+			fmt.Println(err)
+			return
 		}
 		res, err := h.cateServices.GetCateById(id)
 
 		if err != nil {
-			errResp.Message = err.Error()
+			fmt.Println(err)
+			return
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(ctx.Writer.Status(), res)
 	}
 }
 
@@ -66,14 +67,16 @@ func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
 		input, err := StrToInt(id)
 		if err != nil {
 			fmt.Println("Error")
+			return
 		}
 		res, err := h.cateServices.GetCateByBook(input)
 
 		if err != nil {
 			fmt.Println("Fail")
+			return
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(ctx.Writer.Status(), res)
 	}
 }

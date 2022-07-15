@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/models"
 	"database/sql"
 	"fmt"
-	"log"
 )
 
 type BookRepository interface {
@@ -33,13 +32,13 @@ func (b DefaulBookRepository) Create(book *models.Book) error {
 	result, err := b.db.Exec(query)
 
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	newId, err := result.LastInsertId()
 
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	fmt.Printf("The last inserted row id: %d", newId)
@@ -83,7 +82,7 @@ func (b DefaulBookRepository) GetByAuthor(authId int) ([]models.Book, error) {
 		err := result.Scan(&book.IdBook, &book.BookName, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
 		books = append(books, book)
@@ -111,7 +110,7 @@ func (b DefaulBookRepository) GetByCate(cateId int) ([]models.Book, error) {
 		err := result.Scan(&book.IdBook, &book.BookName, &cate.CategoryId, &cate.CategoryName, &author.IdAuthor, &author.Name)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
 		books = append(books, book)
@@ -119,7 +118,7 @@ func (b DefaulBookRepository) GetByCate(cateId int) ([]models.Book, error) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return books, nil
@@ -130,13 +129,13 @@ func (b DefaulBookRepository) GetByName(name string) (*models.Book, error) {
 	book := models.Book{}
 	query, err := b.db.Prepare("SELECT book.idbook, book.bookname, b.nameCategory, c.Name, book.authorId, book.categoryId FROM author_book_db.book as book join author_book_db.category as b on book.categoryId = b.idCategory join author_book_db.author as c on book.authorId = c.idAuthor where bookname like ?")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	result := query.QueryRow("%" + name + "%")
 
 	err = result.Scan(&book.IdBook, &book.BookName)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	return &book, nil
 }

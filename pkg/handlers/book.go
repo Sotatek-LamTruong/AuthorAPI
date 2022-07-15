@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/services"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,13 +25,15 @@ func (b BookHandlers) CreateBook() gin.HandlerFunc {
 		errs := ctx.BindJSON(&req)
 		if errs != nil {
 			fmt.Println("Convert fail")
+			return
 		}
 		err = b.bookServices.CreateBook(&req)
 		if err != nil {
 			fmt.Println("Create Fail")
+			return
 		}
 
-		ctx.JSON(http.StatusOK, "Create success")
+		ctx.JSON(ctx.Writer.Status(), "Create success")
 	}
 }
 
@@ -44,14 +45,16 @@ func (b BookHandlers) GetBookByAuthor() gin.HandlerFunc {
 		id, err := StrToInt(authId)
 		if err != nil {
 			fmt.Println("Convert fail")
+			return
 		}
 		res, err := b.bookServices.GetBookByAuthor(id)
 		if err != nil {
 			fmt.Println("Fail")
+			return
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Books)
+		ctx.JSON(ctx.Writer.Status(), res.Books)
 	}
 }
 
@@ -63,14 +66,16 @@ func (b BookHandlers) GetBookByCate() gin.HandlerFunc {
 		id, err := StrToInt(cateId)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 		res, err := b.bookServices.GetBookByCate(id)
 		if err != nil {
 			fmt.Println("Fail")
+			return
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Books)
+		ctx.JSON(ctx.Writer.Status(), res.Books)
 	}
 }
 
@@ -80,11 +85,12 @@ func (b BookHandlers) GetBookByName() gin.HandlerFunc {
 
 		res, err := b.bookServices.GetBookByName(nameAuthor)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println(err)
+			return
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Book)
+		ctx.JSON(ctx.Writer.Status(), res.Book)
 	}
 }
 
@@ -96,9 +102,10 @@ func (b BookHandlers) UpdateAuthorByBook() gin.HandlerFunc {
 		err := ctx.BindJSON(&req)
 		if err != nil {
 			fmt.Println("Get data fail")
+			return
 		}
 		b.bookServices.UpdateAuthorByBook(aId, bId, &req)
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, "Update Success")
+		ctx.JSON(ctx.Writer.Status(), "Update Success")
 	}
 }

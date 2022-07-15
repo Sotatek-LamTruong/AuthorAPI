@@ -55,7 +55,7 @@ func (d DefaultCategory) GetCateByBook(id int) (*dto.GetCateRes, error) {
 	cate, err := d.repo.GetByBook(id)
 
 	if err != nil {
-		fmt.Println("Fail")
+		return nil, err
 	}
 
 	return &dto.GetCateRes{

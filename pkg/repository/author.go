@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/models"
 	"database/sql"
 	"fmt"
-	"log"
 )
 
 type AuthorRepository interface {
@@ -33,7 +32,7 @@ func (r DefaulAuthorRepository) GetAllAuthors() ([]models.Author, error) {
 	result, err := r.db.Query("SELECT * FROM author_book_db.author")
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	for result.Next() {
@@ -41,7 +40,7 @@ func (r DefaulAuthorRepository) GetAllAuthors() ([]models.Author, error) {
 		err := result.Scan(&author.IdAuthor, &author.Name)
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		authors = append(authors, author)
@@ -56,7 +55,7 @@ func (r DefaulAuthorRepository) GetAllBooks() ([]models.Book, error) {
 	result, err := r.db.Query("SELECT * FROM author_book_db.book")
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	for result.Next() {
@@ -64,7 +63,7 @@ func (r DefaulAuthorRepository) GetAllBooks() ([]models.Book, error) {
 		err := result.Scan(&book.IdBook, &book.BookName, &book.CategoryId)
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		books = append(books, book)
@@ -84,14 +83,14 @@ func (b DefaulAuthorRepository) GetAuthorByBook(bId int) ([]models.Author, error
 		err := result.Scan(&author.IdAuthor, &author.Name)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
 		authors = append(authors, author)
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return authors, nil
@@ -110,14 +109,14 @@ func (b DefaulAuthorRepository) GetBookByAuthor(authId int) ([]models.Book, erro
 		err := result.Scan(&book.IdBook, &book.BookName, &book.CategoryId)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
 		books = append(books, book)
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return books, nil
@@ -130,13 +129,13 @@ func (r DefaulAuthorRepository) Create(author *models.Author) error {
 	result, err := r.db.Exec(query)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	lastID, err := result.LastInsertId()
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Printf("The last inserted row id: %d", lastID)
@@ -160,7 +159,7 @@ func (r DefaulAuthorRepository) GetByBook(id int) ([]models.Author, error) {
 		authors = append(authors, author)
 	}
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return authors, nil
 }
@@ -172,7 +171,7 @@ func (r DefaulAuthorRepository) Get(id int) (*models.Author, error) {
 
 	err := result.Scan(&author.IdAuthor, &author.Name)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return author, nil
 }

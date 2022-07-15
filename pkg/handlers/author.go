@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/services"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -27,11 +26,12 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 		var err error
 		res, err = h.authorServices.GetAllAuthors()
 		if err != nil {
-			ctx.JSON(http.StatusExpectationFailed, "Fail get author")
+			ctx.JSON(ctx.Writer.Status(), "Fail get author")
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Authors)
+		ctx.JSON(ctx.Writer.Status(), res.Authors)
+
 	}
 }
 
@@ -44,15 +44,16 @@ func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
 		id, erros := StrToInt(authID)
 		if erros != nil {
 			fmt.Println("Convert fail")
+			return
 		}
 		res, err = h.authorServices.GetAuthor(id)
 
 		if err != nil {
-			ctx.JSON(http.StatusExpectationFailed, "Fail get author")
+			ctx.JSON(ctx.Writer.Status(), "Fail get author")
 		}
 
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(ctx.Writer.Status(), res)
 	}
 }
 
@@ -66,7 +67,8 @@ func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 		erros := h.authorServices.CreateAuthor(req)
 
 		if erros != nil {
-			ctx.JSON(http.StatusExpectationFailed, "Create fail")
+			ctx.JSON(ctx.Writer.Status(), "Create fail")
+			return
 		}
 		fmt.Println("Insert success")
 	}
@@ -78,11 +80,9 @@ func (h AuthorHandlers) GetAuthorByBook() gin.HandlerFunc {
 		var err error
 		res, err = h.authorServices.GetAuthorsByBook()
 		if err != nil {
-			ctx.JSON(http.StatusExpectationFailed, "Get fail")
+			ctx.JSON(ctx.Writer.Status(), "Get fail")
 		}
-
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(http.StatusOK, res.Authors)
+		ctx.JSON(ctx.Writer.Status(), res.Authors)
 	}
 }
 

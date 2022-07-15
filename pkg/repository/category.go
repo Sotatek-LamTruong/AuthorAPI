@@ -4,7 +4,6 @@ import (
 	"book-author/pkg/models"
 	"database/sql"
 	"fmt"
-	"log"
 )
 
 type CategoryRepository interface {
@@ -29,13 +28,13 @@ func (r DefaulCateRepository) Create(cate *models.Category) error {
 	result, err := r.db.Exec(query)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	lastID, err := result.LastInsertId()
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Printf("The last inserted row id: %d", lastID)
@@ -58,7 +57,7 @@ func (r DefaulCateRepository) GetById(id int) (*models.Category, []models.Book, 
 
 		err := result.Scan(&cate.CategoryId, &cate.CategoryName, &book.IdBook, &book.BookName)
 		if err != nil {
-			log.Fatal(err)
+			return nil, nil, err
 		}
 		fmt.Println(book)
 		books = append(books, book)
@@ -73,7 +72,7 @@ func (r DefaulCateRepository) GetByBook(id int) (*models.Category, error) {
 	err := result.Scan(&cate.CategoryId, &cate.CategoryName)
 	fmt.Println(cate)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	return &cate, nil
 }

@@ -29,12 +29,12 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 	auth := dto.AuthorDTO{}
 	var list []dto.AuthorDTO
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	for _, author := range authors {
 		books, err := d.repo.GetBookByAuthor(author.IdAuthor)
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 		auth.AuthorId = author.IdAuthor
 		auth.AuthorName = author.Name
@@ -49,11 +49,11 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
 	author, err := d.repo.Get(id)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	books, err := d.repo.GetBookByAuthor(id)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return &dto.GetAuthorRes{
@@ -72,7 +72,7 @@ func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
 	err := d.repo.Create(&result)
 
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	return nil
 }
@@ -95,7 +95,7 @@ func (d DefaultAuthor) GetAuthorsByBook() (*dto.GetAuthorsByBook, error) {
 		list = append(list, book)
 	}
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return &dto.GetAuthorsByBook{
