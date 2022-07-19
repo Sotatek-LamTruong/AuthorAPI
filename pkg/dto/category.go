@@ -21,6 +21,10 @@ type GetCateRes struct {
 	Books        []models.Book `json:"books,omitempty"`
 }
 
+type DelCateReq struct {
+	CategoryId int `json:"id"`
+}
+
 type GetCateByNameReq struct {
 	Name string `json:"name"`
 }

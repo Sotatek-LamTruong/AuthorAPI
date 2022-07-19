@@ -12,6 +12,7 @@ type CategoryServices interface {
 	CreateCategory(*dto.CreateCateReq) error
 	GetCateById(id int) (*dto.GetCateRes, error)
 	GetCateByBook(id int) (*dto.GetCateRes, error)
+	DeleteCategory(id int) error
 }
 
 type DefaultCategory struct {
@@ -62,4 +63,14 @@ func (d DefaultCategory) GetCateByBook(id int) (*dto.GetCateRes, error) {
 		CategoryId:   cate.CategoryId,
 		CategoryName: cate.CategoryName,
 	}, nil
+}
+
+func (d DefaultCategory) DeleteCategory(id int) error {
+	err := d.repo.Delete(id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

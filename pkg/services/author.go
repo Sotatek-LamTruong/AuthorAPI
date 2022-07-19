@@ -29,11 +29,13 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 	auth := dto.AuthorDTO{}
 	var list []dto.AuthorDTO
 	if err != nil {
+		fmt.Println("1")
 		return nil, err
 	}
 	for _, author := range authors {
 		books, err := d.repo.GetBookByAuthor(author.IdAuthor)
 		if err != nil {
+			fmt.Println("2")
 			return nil, err
 		}
 		auth.AuthorId = author.IdAuthor

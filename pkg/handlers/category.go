@@ -80,3 +80,23 @@ func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
 		ctx.JSON(ctx.Writer.Status(), res)
 	}
 }
+
+func (h CategoryHandlers) DeleteCate() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var err error
+		input, err := StrToInt(id)
+		if err != nil {
+			fmt.Println("Error")
+			return
+		}
+		err = h.cateServices.DeleteCategory(input)
+		if err != nil {
+			fmt.Println("Fail")
+			return
+		}
+
+		ctx.Header("content-type", "application/json")
+		ctx.JSON(ctx.Writer.Status(), "Delete success")
+	}
+}

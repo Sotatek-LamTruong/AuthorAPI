@@ -27,6 +27,7 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 		res, err = h.authorServices.GetAllAuthors()
 		if err != nil {
 			ctx.JSON(ctx.Writer.Status(), "Fail get author")
+			return
 		}
 
 		ctx.Header("content-type", "application/json")

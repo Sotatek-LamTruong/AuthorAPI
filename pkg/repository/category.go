@@ -10,6 +10,7 @@ type CategoryRepository interface {
 	Create(cate *models.Category) error
 	GetById(id int) (*models.Category, []models.Book, error)
 	GetByBook(id int) (*models.Category, error)
+	Delete(id int) error
 }
 
 type DefaulCateRepository struct {
@@ -75,4 +76,13 @@ func (r DefaulCateRepository) GetByBook(id int) (*models.Category, error) {
 		return nil, err
 	}
 	return &cate, nil
+}
+
+func (r DefaulCateRepository) Delete(id int) error {
+	query := fmt.Sprintf("DELETE FROM category where idCategory = %d", id)
+	_, err := r.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	return nil
 }

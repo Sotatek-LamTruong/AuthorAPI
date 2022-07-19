@@ -30,7 +30,7 @@ func (r DefaulAuthorRepository) GetAllAuthors() ([]models.Author, error) {
 	var authors []models.Author
 
 	result, err := r.db.Query("SELECT * FROM author_book_db.author")
-
+	fmt.Println(result)
 	if err != nil {
 		return nil, err
 	}
