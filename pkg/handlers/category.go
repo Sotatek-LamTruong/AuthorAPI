@@ -4,7 +4,7 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/services"
 	"fmt"
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,16 +25,26 @@ func (h CategoryHandlers) CreateCategory() gin.HandlerFunc {
 		var err error
 		errs := ctx.BindJSON(&req)
 		if errs != nil {
-			fmt.Println("Convert fail")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
-		err = h.cateServices.CreateCategory(&req)
+		row, err := h.cateServices.CreateCategory(&req)
 		if err != nil {
-			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
 			return
 		}
-		ctx.Writer.Status()
-		log.Println("Insert success")
+		msg := fmt.Sprintf("new category has id is %d add to db", row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
 	}
 }
 
@@ -44,18 +54,35 @@ func (h CategoryHandlers) GetCateById() gin.HandlerFunc {
 
 		id, err := StrToInt(bookID)
 		if err != nil {
-			fmt.Println(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
-		res, err := h.cateServices.GetCateById(id)
+		res, err := h.cateServices.GetCate(id)
 
 		if err != nil {
-			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
 			return
 		}
-
+		// if err == nil && res.CategoryId == 0 {
+		// 	fmt.Println("3")
+		// 	ctx.JSON(ctx.Writer.Status(), gin.H{
+		// 		"status": "Id not exist",
+		// 		"code":   400,
+		// 	})
+		// 	return
+		// }
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status":   "ok",
+			"code":     "200",
+			"category": res,
+		})
 	}
 }
 
@@ -72,7 +99,10 @@ func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
 		res, err := h.cateServices.GetCateByBook(input)
 
 		if err != nil {
-			fmt.Println("Fail")
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
 			return
 		}
 
@@ -84,19 +114,27 @@ func (h CategoryHandlers) GetCateByBook() gin.HandlerFunc {
 func (h CategoryHandlers) DeleteCate() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		var err error
 		input, err := StrToInt(id)
 		if err != nil {
-			fmt.Println("Error")
-			return
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 		}
-		err = h.cateServices.DeleteCategory(input)
+		row, err := h.cateServices.DeleteCategory(input)
 		if err != nil {
-			fmt.Println("Fail")
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
 			return
 		}
 
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), "Delete success")
+		msg := fmt.Sprintf("a category has id is %d remove to db", row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "delete successfully category",
+			"code":   "200",
+			"data":   msg,
+		})
 	}
 }

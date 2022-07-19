@@ -7,10 +7,11 @@ import (
 )
 
 type CategoryRepository interface {
-	Create(cate *models.Category) error
-	GetById(id int) (*models.Category, []models.Book, error)
+	Create(cate *models.Category) (int64, error)
+	Get(id int) (*models.Category, error)
 	GetByBook(id int) (*models.Category, error)
-	Delete(id int) error
+	Delete(id int) (int64, error)
+	GetBooks(category *models.Category) ([]models.Book, error)
 }
 
 type DefaulCateRepository struct {
@@ -23,48 +24,57 @@ func NewCategoryRepo(db *sql.DB) DefaulCateRepository {
 	}
 }
 
-func (r DefaulCateRepository) Create(cate *models.Category) error {
-	query := fmt.Sprintf(" INSERT INTO author_book_db.category (nameCategory) VALUES	('%v')", cate.CategoryName)
-	fmt.Println(cate.CategoryName)
+func (r DefaulCateRepository) Create(cate *models.Category) (int64, error) {
+	query := fmt.Sprintf(" INSERT INTO category (name) VALUES	('%v')", cate.CategoryName)
 	result, err := r.db.Exec(query)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	lastID, err := result.LastInsertId()
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	fmt.Printf("The last inserted row id: %d", lastID)
-	return nil
+	return lastID, nil
 
 }
 
-func (r DefaulCateRepository) GetById(id int) (*models.Category, []models.Book, error) {
+func (r DefaulCateRepository) Get(id int) (*models.Category, error) {
 	cate := models.Category{}
-	var books []models.Book
-
-	query := fmt.Sprintf("SELECT categoryId, nameCategory, idbook, bookname FROM author_book_db.book as a join author_book_db.category as b on a.categoryId = b.idCategory where categoryId = %d", id)
-	result, err := r.db.Query(query)
-
+	query := fmt.Sprintf("SELECT * FROM newdb.category where categoryid = %d;", id)
+	result := r.db.QueryRow(query)
+	err := result.Scan(&cate.CategoryId, &cate.CategoryName)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
+	return &cate, nil
+}
+
+func (r DefaulCateRepository) GetBooks(category *models.Category) ([]models.Book, error) {
+	var books []models.Book
+	query := fmt.Sprintf("SELECT c.bookid,c.name FROM `newdb`.`category` as a join category_book as b on a.categoryid = b.categoryid join book as c on b.bookid = c.bookid where a.categoryid = %d", category.CategoryId)
+	result, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
 	for result.Next() {
 		book := models.Book{}
 
-		err := result.Scan(&cate.CategoryId, &cate.CategoryName, &book.IdBook, &book.BookName)
+		err := result.Scan(&book.IdBook, &book.BookName)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		fmt.Println(book)
 		books = append(books, book)
 	}
-	return &cate, books, nil
+	return books, nil
 }
+
 func (r DefaulCateRepository) GetByBook(id int) (*models.Category, error) {
 	var cate = models.Category{}
 	fmt.Println(id)
@@ -78,11 +88,16 @@ func (r DefaulCateRepository) GetByBook(id int) (*models.Category, error) {
 	return &cate, nil
 }
 
-func (r DefaulCateRepository) Delete(id int) error {
-	query := fmt.Sprintf("DELETE FROM category where idCategory = %d", id)
-	_, err := r.db.Exec(query)
+func (r DefaulCateRepository) Delete(id int) (int64, error) {
+	query := fmt.Sprintf("DELETE FROM category where categoryid = %d", id)
+	result, err := r.db.Exec(query) // check result if id not exist
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	row, _ := result.RowsAffected()
+	if row == 0 {
+		fmt.Println("Id not exist")
+		return 0, nil
+	}
+	return row, nil
 }

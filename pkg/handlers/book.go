@@ -44,7 +44,7 @@ func (b BookHandlers) GetBookByAuthor() gin.HandlerFunc {
 		// var errResp error
 		id, err := StrToInt(authId)
 		if err != nil {
-			fmt.Println("Convert fail")
+			fmt.Println("Convert fail") // response json
 			return
 		}
 		res, err := b.bookServices.GetBookByAuthor(id)
@@ -82,7 +82,7 @@ func (b BookHandlers) GetBookByCate() gin.HandlerFunc {
 func (b BookHandlers) GetBookByName() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		nameAuthor := ctx.Param("name")
-
+		fmt.Println(nameAuthor)
 		res, err := b.bookServices.GetBookByName(nameAuthor)
 		if err != nil {
 			fmt.Println(err)
@@ -97,6 +97,7 @@ func (b BookHandlers) GetBookByName() gin.HandlerFunc {
 func (b BookHandlers) UpdateAuthorByBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.UpdateAuthorByBookReq
+		// De tham so update ben body
 		aId, _ := StrToInt(ctx.Param("authid"))
 		bId, _ := StrToInt(ctx.Param("bookid"))
 		err := ctx.BindJSON(&req)
@@ -106,6 +107,6 @@ func (b BookHandlers) UpdateAuthorByBook() gin.HandlerFunc {
 		}
 		b.bookServices.UpdateAuthorByBook(aId, bId, &req)
 		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), "Update Success")
+		ctx.JSON(ctx.Writer.Status(), "Update Success") // sua thanh json
 	}
 }

@@ -5,14 +5,13 @@ import (
 	"book-author/pkg/models"
 	"book-author/pkg/repository"
 	"fmt"
-	"log"
 )
 
 type CategoryServices interface {
-	CreateCategory(*dto.CreateCateReq) error
-	GetCateById(id int) (*dto.GetCateRes, error)
+	CreateCategory(*dto.CreateCateReq) (int64, error)
+	GetCate(id int) (*dto.GetCateRes, error)
 	GetCateByBook(id int) (*dto.GetCateRes, error)
-	DeleteCategory(id int) error
+	DeleteCategory(id int) (int64, error)
 }
 
 type DefaultCategory struct {
@@ -25,23 +24,27 @@ func NewCategory(repo repository.CategoryRepository) CategoryServices {
 	}
 }
 
-func (d DefaultCategory) CreateCategory(cate *dto.CreateCateReq) error {
+func (d DefaultCategory) CreateCategory(cate *dto.CreateCateReq) (int64, error) {
 	result := models.Category{
 		CategoryName: cate.CategoryName,
 	}
-	err := d.repo.Create(&result)
+	row, err := d.repo.Create(&result)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return row, nil
 }
 
-func (d DefaultCategory) GetCateById(Id int) (*dto.GetCateRes, error) {
-	cate, books, err := d.repo.GetById(Id)
-
+func (d DefaultCategory) GetCate(Id int) (*dto.GetCateRes, error) {
+	cate, err := d.repo.Get(Id)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
+	}
+	books, err := d.repo.GetBooks(cate)
+	fmt.Println(books)
+	if err != nil {
+		return nil, err
 	}
 
 	return &dto.GetCateRes{
@@ -65,12 +68,12 @@ func (d DefaultCategory) GetCateByBook(id int) (*dto.GetCateRes, error) {
 	}, nil
 }
 
-func (d DefaultCategory) DeleteCategory(id int) error {
-	err := d.repo.Delete(id)
+func (d DefaultCategory) DeleteCategory(id int) (int64, error) {
+	result, err := d.repo.Delete(id)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return result, nil
 }
