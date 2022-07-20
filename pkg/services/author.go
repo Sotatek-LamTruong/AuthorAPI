@@ -10,8 +10,8 @@ import (
 type AuthorServices interface {
 	GetAllAuthors() (*dto.ListAuthor, error)
 	GetAuthor(id int) (*dto.GetAuthorRes, error)
-	CreateAuthor(dto.CreateAuthorReq) error
-	GetAuthorsByBook() (*dto.GetAuthorsByBook, error)
+	CreateAuthor(dto.CreateAuthorReq) (int64, error)
+	GetAuthorsByBook(id int) (*dto.GetAuthorsByBook, error)
 }
 
 type DefaultAuthor struct {
@@ -33,7 +33,7 @@ func (d DefaultAuthor) GetAllAuthors() (*dto.ListAuthor, error) {
 		return nil, err
 	}
 	for _, author := range authors {
-		books, err := d.repo.GetBookByAuthor(author.IdAuthor)
+		books, err := d.repo.GetBooks(&author)
 		if err != nil {
 			fmt.Println("2")
 			return nil, err
@@ -53,7 +53,7 @@ func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
 	if err != nil {
 		return nil, err
 	}
-	books, err := d.repo.GetBookByAuthor(id)
+	books, err := d.repo.GetBooks(author)
 	if err != nil {
 		return nil, err
 	}
@@ -66,41 +66,36 @@ func (d DefaultAuthor) GetAuthor(id int) (*dto.GetAuthorRes, error) {
 
 }
 
-func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) error {
+func (d DefaultAuthor) CreateAuthor(author dto.CreateAuthorReq) (int64, error) {
 	result := models.Author{
 		Name: author.Name,
 	}
 
-	err := d.repo.Create(&result)
+	row, err := d.repo.Create(&result)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return row, nil
 }
 
-func (d DefaultAuthor) GetAuthorsByBook() (*dto.GetAuthorsByBook, error) {
-	books, err := d.repo.GetAllBooks()
-	// book := dto.GetAuthorByBook{}
-	var list []dto.GetAuthorByBook
-	for _, b := range books {
-		book := dto.GetAuthorByBook{}
-		authors, err := d.repo.GetByBook(b.IdBook)
-		if err != nil {
-			fmt.Println(err)
-		}
-		book.Authors = authors
-		book.BookId = b.IdBook
-		book.BookName = b.BookName
-		book.CategoryId = b.CategoryId
-
-		list = append(list, book)
-	}
+func (d DefaultAuthor) GetAuthorsByBook(id int) (*dto.GetAuthorsByBook, error) {
+	book, err := d.repo.GetBook(id)
 	if err != nil {
+		fmt.Println("1")
+		return nil, err
+	}
+
+	authors, err := d.repo.GetAuthors(book)
+
+	if err != nil {
+		fmt.Println("2")
 		return nil, err
 	}
 
 	return &dto.GetAuthorsByBook{
-		Authors: list,
+		BookId:   book.IdBook,
+		BookName: book.BookName,
+		Authors:  authors,
 	}, nil
 }

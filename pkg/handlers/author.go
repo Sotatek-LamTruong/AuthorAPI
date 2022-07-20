@@ -4,6 +4,7 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/services"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -26,12 +27,18 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 		var err error
 		res, err = h.authorServices.GetAllAuthors()
 		if err != nil {
-			ctx.JSON(ctx.Writer.Status(), "Fail get author")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
 
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res.Authors)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"list":   res,
+		})
 
 	}
 }
@@ -39,22 +46,31 @@ func (h AuthorHandlers) GetAllAuthors() gin.HandlerFunc {
 func (h AuthorHandlers) GetAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authID := ctx.Param("id")
+		id, err := StrToInt(authID)
 
 		var res *dto.GetAuthorRes
-		var err error
-		id, erros := StrToInt(authID)
-		if erros != nil {
-			fmt.Println("Convert fail")
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
 		res, err = h.authorServices.GetAuthor(id)
 
 		if err != nil {
-			ctx.JSON(ctx.Writer.Status(), "Fail get author")
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
 		}
 
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status":   "ok",
+			"code":     "200",
+			"category": res,
+		})
 	}
 }
 
@@ -63,27 +79,55 @@ func (h AuthorHandlers) CreateAuthor() gin.HandlerFunc {
 		var req dto.CreateAuthorReq
 		err := ctx.BindJSON(&req)
 		if err != nil {
-			fmt.Println("Request fail")
-		}
-		erros := h.authorServices.CreateAuthor(req)
-
-		if erros != nil {
-			ctx.JSON(ctx.Writer.Status(), "Create fail")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
-		fmt.Println("Insert success")
+		row, err := h.authorServices.CreateAuthor(req)
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+		msg := fmt.Sprintf("new author has id is %d add to db", row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
 	}
 }
 
 func (h AuthorHandlers) GetAuthorByBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var res *dto.GetAuthorsByBook
-		var err error
-		res, err = h.authorServices.GetAuthorsByBook()
+		authID := ctx.Param("id")
+		id, err := StrToInt(authID)
 		if err != nil {
-			ctx.JSON(ctx.Writer.Status(), "Get fail")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
 		}
-		ctx.JSON(ctx.Writer.Status(), res.Authors)
+		res, err = h.authorServices.GetAuthorsByBook(id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"res":    res,
+		})
 	}
 }
 

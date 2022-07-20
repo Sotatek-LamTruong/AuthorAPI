@@ -27,7 +27,7 @@ func NewBookRepo(db *sql.DB) DefaulBookRepository {
 
 func (b DefaulBookRepository) Create(book *models.Book) error {
 	fmt.Println(book)
-	query := fmt.Sprintf("INSERT INTO author_book_db.book (bookname,categoryId) VALUES ('%v',%d);", book.BookName, book.CategoryId)
+	query := fmt.Sprintf("INSERT INTO book (bookname) VALUES ('%v');", book.BookName)
 
 	result, err := b.db.Exec(query)
 
@@ -48,6 +48,17 @@ func (b DefaulBookRepository) Create(book *models.Book) error {
 }
 
 func (b DefaulBookRepository) UpdateAuthor(aId int, name string) error {
+	query := fmt.Sprintf("UPDATE author SET Name = '%v' WHERE idAuthor = %d", name, aId)
+
+	_, err := b.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Update success")
+	return nil
+}
+
+func (b DefaulBookRepository) Get(aId int, name string) error {
 	query := fmt.Sprintf("UPDATE author SET Name = '%v' WHERE idAuthor = %d", name, aId)
 
 	_, err := b.db.Exec(query)

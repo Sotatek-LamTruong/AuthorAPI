@@ -39,7 +39,9 @@ type CreateAuthorRes struct {
 //
 
 type GetAuthorsByBook struct {
-	Authors []GetAuthorByBook `json:"authors"`
+	BookId   int             `json:"book_id"`
+	BookName string          `json:"book_name"`
+	Authors  []models.Author `json:"authors"`
 }
 
 type GetAuthorByBook struct {

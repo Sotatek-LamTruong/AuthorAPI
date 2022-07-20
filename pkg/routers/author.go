@@ -14,5 +14,5 @@ func AuthorRoutes(route *gin.RouterGroup) {
 	route.GET("/list", h.GetAllAuthors())
 	route.POST("/create", h.CreateAuthor())
 	route.GET("/get/:id", h.GetAuthor())
-	route.GET("/getByBook", h.GetAuthorByBook())
+	route.GET("/getByBook/:id", h.GetAuthorByBook())
 }
