@@ -8,11 +8,13 @@ import (
 )
 
 type BookServices interface {
-	CreateBook(book *dto.AddBookReq) error
-	GetBookByCate(bookId int) (*dto.GetBookRes, error)
-	GetBookByAuthor(authorId int) (*dto.GetBookRes, error)
-	GetBookByName(name string) (*dto.GetBookByNameRes, error)
-	UpdateAuthorByBook(aId int, bId int, name *dto.UpdateAuthorByBookReq) error
+	CreateBook(book *dto.AddBookReq) (int64, error)
+	AddCategory(bookid int, req *dto.CateReq) (*dto.AuthorRes, error)
+	AddAuthors(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error)
+	EditAuthor(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error)
+	DeleteAuthor(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error)
+	GetBooksByAuthor(req *dto.AuthorReq) (*dto.GetByAuthor, error)
+	GetBooksByCate(req *dto.CateReq) (*dto.GetByCate, error)
 }
 
 type DefaultBook struct {
@@ -25,64 +27,132 @@ func NewBook(repo repository.BookRepository) BookServices {
 	}
 }
 
-func (b DefaultBook) CreateBook(book *dto.AddBookReq) error {
+func (b DefaultBook) CreateBook(book *dto.AddBookReq) (int64, error) {
 	result := models.Book{
 		BookName: book.BookName,
 	}
 	fmt.Println(result)
 
-	err := b.repo.Create(&result)
+	row, err := b.repo.Create(&result)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
+	return row, nil
+}
+
+func (b DefaultBook) AddCategory(bookid int, req *dto.CateReq) (*dto.AuthorRes, error) {
+	book, err := b.repo.Get(bookid)
+	if err != nil {
+		return nil, err
+	}
+	row, err := b.repo.AddCate(book, req.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AuthorRes{
+		Row:      row,
+		BookID:   book.IdBook,
+		BookName: book.BookName,
+	}, nil
+
+}
+
+func (b DefaultBook) AddAuthors(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error) {
+	book, err := b.repo.Get(bookid)
+	if err != nil {
+		return nil, err
+	}
+	row, err := b.repo.AddAuthor(book, req.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AuthorRes{
+		Row:      row,
+		BookID:   book.IdBook,
+		BookName: book.BookName,
+	}, nil
+
+}
+func GetAuthor(authors []models.Author, authid int) *models.Author {
+	for _, author := range authors {
+		if author.IdAuthor == authid {
+			return &author
+		}
+	}
 	return nil
 }
 
-func (b DefaultBook) GetBookByCate(cateId int) (*dto.GetBookRes, error) {
-	books, err := b.repo.GetByCate(cateId)
+func (b DefaultBook) EditAuthor(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error) {
 
+	book, authors, err := b.repo.GetAuthors(bookid)
 	if err != nil {
 		return nil, err
 	}
-
-	return &dto.GetBookRes{
-		Books: books,
+	author := GetAuthor(authors, req.AuthorID)
+	if author == nil {
+		return nil, nil
+	}
+	row, err := b.repo.UpdateAuthor(req.AuthorID, req.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.AuthorRes{
+		Row:      row,
+		BookID:   book.IdBook,
+		BookName: book.BookName,
 	}, nil
 
 }
 
-func (b DefaultBook) GetBookByAuthor(authorId int) (*dto.GetBookRes, error) {
-	books, err := b.repo.GetByAuthor(authorId)
+func (b DefaultBook) DeleteAuthor(bookid int, req *dto.AuthorReq) (*dto.AuthorRes, error) {
 
+	book, authors, err := b.repo.GetAuthors(bookid)
 	if err != nil {
 		return nil, err
 	}
-
-	return &dto.GetBookRes{
-		Books: books,
+	author := GetAuthor(authors, req.AuthorID)
+	if author == nil {
+		fmt.Println("Id not exist")
+		return nil, nil
+	}
+	row, err := b.repo.DeleteAuthor(book, req.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.AuthorRes{
+		Row:      row,
+		BookID:   book.IdBook,
+		BookName: book.BookName,
 	}, nil
 
 }
 
-func (b DefaultBook) GetBookByName(name string) (*dto.GetBookByNameRes, error) {
-	book, err := b.repo.GetByName(name)
-
+func (b DefaultBook) GetBooksByAuthor(req *dto.AuthorReq) (*dto.GetByAuthor, error) {
+	author, books, err := b.repo.GetByAuthor(req.AuthorID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.GetBookByNameRes{
-		Book: book,
+	return &dto.GetByAuthor{
+		AuthorID:   author.IdAuthor,
+		AuthorName: author.Name,
+		Books:      books,
 	}, nil
 }
 
-func (b DefaultBook) UpdateAuthorByBook(aId int, bId int, req *dto.UpdateAuthorByBookReq) error {
-	_, err := b.repo.GetAuthorByBook(bId, aId)
+func (b DefaultBook) GetBooksByCate(req *dto.CateReq) (*dto.GetByCate, error) {
+	author, books, err := b.repo.GetByCate(req.CategoryID)
 	if err != nil {
-		fmt.Println("Author not exist")
+		return nil, err
 	}
-	b.repo.UpdateAuthor(aId, req.Name)
-	return nil
+
+	return &dto.GetByCate{
+		CateID:   author.CategoryId,
+		CateName: author.CategoryName,
+		Books:    books,
+	}, nil
 }

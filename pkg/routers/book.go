@@ -13,8 +13,10 @@ func BookRoutes(route *gin.RouterGroup) {
 	h := handlers.NewBookHandlers(services.NewBook(repository.NewBookRepo(config.DB)))
 
 	route.POST("/create", h.CreateBook())
-	route.GET("/getByCate/:id", h.GetBookByCate())
-	route.GET("/getByAuthor/:id", h.GetBookByAuthor())
-	route.GET("/getByName/:name", h.GetBookByName())
-	route.PUT("/update/:authid/:bookid", h.UpdateAuthorByBook())
+	route.POST("/category/create/:id", h.AddCate())
+	route.POST("/author/create/:id", h.AddAuthor())
+	route.PUT("/author/edit/:id", h.EditAuthor())
+	route.DELETE("/author/delete/:id", h.DeleteAuthor())
+	route.GET("/getByAuthor", h.GetBooksByAuthor())
+	route.GET("/getByCate", h.GetBooksByCategory())
 }

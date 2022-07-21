@@ -4,6 +4,7 @@ import (
 	"book-author/pkg/dto"
 	"book-author/pkg/services"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,92 +22,234 @@ func NewBookHandlers(bookServices services.BookServices) BookHandlers {
 func (b BookHandlers) CreateBook() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dto.AddBookReq
-		var err error
-		errs := ctx.BindJSON(&req)
-		if errs != nil {
-			fmt.Println("Convert fail")
-			return
-		}
-		err = b.bookServices.CreateBook(&req)
-		if err != nil {
-			fmt.Println("Create Fail")
-			return
-		}
-
-		ctx.JSON(ctx.Writer.Status(), "Create success")
-	}
-}
-
-func (b BookHandlers) GetBookByAuthor() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authId := ctx.Param("id")
-
-		// var errResp error
-		id, err := StrToInt(authId)
-		if err != nil {
-			fmt.Println("Convert fail") // response json
-			return
-		}
-		res, err := b.bookServices.GetBookByAuthor(id)
-		if err != nil {
-			fmt.Println("Fail")
-			return
-		}
-
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res.Books)
-	}
-}
-
-func (b BookHandlers) GetBookByCate() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		cateId := ctx.Param("id")
-
-		// var errResp error
-		id, err := StrToInt(cateId)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		res, err := b.bookServices.GetBookByCate(id)
-		if err != nil {
-			fmt.Println("Fail")
-			return
-		}
-
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res.Books)
-	}
-}
-
-func (b BookHandlers) GetBookByName() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		nameAuthor := ctx.Param("name")
-		fmt.Println(nameAuthor)
-		res, err := b.bookServices.GetBookByName(nameAuthor)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), res.Book)
-	}
-}
-
-func (b BookHandlers) UpdateAuthorByBook() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		var req dto.UpdateAuthorByBookReq
-		// De tham so update ben body
-		aId, _ := StrToInt(ctx.Param("authid"))
-		bId, _ := StrToInt(ctx.Param("bookid"))
 		err := ctx.BindJSON(&req)
 		if err != nil {
-			fmt.Println("Get data fail")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
 			return
 		}
-		b.bookServices.UpdateAuthorByBook(aId, bId, &req)
-		ctx.Header("content-type", "application/json")
-		ctx.JSON(ctx.Writer.Status(), "Update Success") // sua thanh json
+		row, err := b.bookServices.CreateBook(&req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+
+		msg := fmt.Sprintf("new book has id is %d add to db", row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
+	}
+}
+
+func (b BookHandlers) AddCate() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.CateReq
+		bookId := ctx.Param("id")
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		id, err := StrToInt(bookId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.AddCategory(id, &req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+
+		msg := fmt.Sprintf("new author added to book has id is %d", res.BookID)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
+	}
+}
+
+func (b BookHandlers) AddAuthor() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.AuthorReq
+		bookId := ctx.Param("id")
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		id, err := StrToInt(bookId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.AddAuthors(id, &req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+
+		msg := fmt.Sprintf("new author added to book has id is %d", res.BookID)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
+	}
+}
+
+func (b BookHandlers) EditAuthor() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.AuthorReq
+		cateId := ctx.Param("id")
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		id, err := StrToInt(cateId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.EditAuthor(id, &req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+
+		msg := fmt.Sprintf("%d row updated", res.Row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
+	}
+}
+
+func (b BookHandlers) DeleteAuthor() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.AuthorReq
+		authId := ctx.Param("id")
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		id, err := StrToInt(authId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.DeleteAuthor(id, &req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+
+		msg := fmt.Sprintf("%d row deleted", res.Row)
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"data":   msg,
+		})
+	}
+}
+
+func (b BookHandlers) GetBooksByAuthor() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.AuthorReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.GetBooksByAuthor(&req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"res":    res,
+		})
+	}
+}
+
+func (b BookHandlers) GetBooksByCategory() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dto.CateReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusBadRequest,
+			})
+			return
+		}
+		res, err := b.bookServices.GetBooksByCate(&req)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": err.Error(),
+				"code":   http.StatusInternalServerError,
+			})
+			return
+		}
+		ctx.JSON(ctx.Writer.Status(), gin.H{
+			"status": "ok",
+			"code":   "200",
+			"res":    res,
+		})
 	}
 }
